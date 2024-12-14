@@ -1,10 +1,15 @@
 const express = require("express");
+const security = require("./config/security");
+const logger = require("./utils/logger");
+
 
 const app = express();
 
 
-// Middleware to parse JSON requests
+// Middleware
 app.use(express.json());
+security(app);
+app.use(require("morgan")("combined", { stream: logger.stream }));
 
 
 
