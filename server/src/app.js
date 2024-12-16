@@ -1,12 +1,21 @@
 const express = require("express");
+const process = require("node:process");
 const security = require("./config/security");
 const logger = require("./utils/logger");
+const cors = require("cors");
+
 
 const app = express();
 
 
 // Middleware
 app.use(express.json());
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true,
+  })
+);
 security(app);
 app.use(require("morgan")("combined", { stream: logger.stream }));
 
@@ -14,11 +23,11 @@ app.use(require("morgan")("combined", { stream: logger.stream }));
 
 
 // routes declarations
-
+const userRoutes = require("./routes/User.Routes");
 
 
 // routes implementation
-
+app.use("/api/users", userRoutes);
 
 
 // http://localhost:8000/api/v1/users/register
