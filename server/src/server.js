@@ -4,6 +4,8 @@ const dotenv = require("dotenv");
 const ConnectDB = require("./config/db");
 
 
+ConnectDB();
+
 dotenv.config({
     path: `./.env`
 });

@@ -2,7 +2,6 @@ const express = require("express");
 const security = require("./config/security");
 const logger = require("./utils/logger");
 
-
 const app = express();
 
 
