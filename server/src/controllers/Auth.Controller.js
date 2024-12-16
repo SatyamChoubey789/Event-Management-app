@@ -58,16 +58,16 @@ const registerUser = asyncHandler(async (req, res) => {
 });
 
 const loginUser = asyncHandler(async (req, res) => {
-  const { emailOrUsername, password } = req.body;
+  const { email, password } = req.body;
 
   // Validate input data
-  if (!emailOrUsername || !password) {
+  if (!email || !password) {
     throw new ApiError(400, "Email or username and password are required");
   }
 
   // Find user by email or username
   const user = await User.findOne({
-    $or: [{ email: emailOrUsername }, { username: emailOrUsername }],
+    $or: [{ email: email }, { username: email }],
   });
 
   // Check if user exists and password matches
