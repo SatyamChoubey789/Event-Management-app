@@ -1,16 +1,19 @@
 const mongoose = require("mongoose");
+const {DB_NAME} = require("../constrants");
 const process = require("node:process");
 
-const ConnectDB = async () => {
+const connectDB = async () => {
   try {
-    const connection = await mongoose.connect(process.env.MONGO_URI);
+    const connectionInstance = await mongoose.connect(
+      `${process.env.MONGO_URI}/${DB_NAME}`
+    );
     console.log(
-      `\n MongoDB connected !! DB HOST: ${connection.connection.host}`
+      `\n MongoDB connected !! DB HOST: ${connectionInstance.connection.host}`
     );
   } catch (error) {
-    console.log("Connection error: " + error);
+    console.log("MONGODB connection FAILED ", error);
     process.exit(1);
   }
 };
 
-module.exports = ConnectDB;
+module.exports = connectDB;
