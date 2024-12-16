@@ -1,10 +1,14 @@
 const { Router } = require("express");
+const {
+  registerUser,
+  loginUser,
+  logoutUser,
+} = require("../controllers/auth.controller");
+const { verifyJWT } = require("../middlewares/auth.middleware");
+const authRoutes = new Router();
 
-const { Signup } = require("../controllers/auth.controller");
-const router = new Router();
+authRoutes.route("/register").post(registerUser);
+authRoutes.route("/login").post(loginUser);
+authRoutes.route("/logout").post(verifyJWT,logoutUser);
 
-
-router.post("/signup", Signup);
-
-
-module.exports = {router};
+module.exports = authRoutes;
