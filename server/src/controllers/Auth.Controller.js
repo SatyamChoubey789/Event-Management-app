@@ -1,5 +1,3 @@
-const Register = () => {};
-
-const Login = () => {};
-
-module.exports = { Register, Login };
+exports.Signup = async(req,res)=>{
+  res.send("hello");
+};

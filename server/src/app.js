@@ -20,15 +20,11 @@ security(app);
 app.use(require("morgan")("combined", { stream: logger.stream }));
 
 
-
-
 // routes declarations
-const userRoutes = require("./routes/User.Routes");
-
+const authRoutes = require("./routes/auth.routes");
 
 // routes implementation
-app.use("/api/users", userRoutes);
-
+app.use("/api/v1/auth", authRoutes);
 
 // http://localhost:8000/api/v1/users/register
 
