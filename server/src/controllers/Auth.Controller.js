@@ -72,7 +72,6 @@ const registerUser = asyncHandler(async (req, res) => {
   });
 });
 
-
 const verifyUser = asyncHandler(async (req, res) => {
   const { token } = req.params;
 
@@ -102,11 +101,10 @@ const verifyUser = asyncHandler(async (req, res) => {
       success: true,
       message: "User verified successfully",
     });
-  } catch (error) {
+  } catch {
     throw new ApiError(400, "Invalid or expired verification token");
   }
 });
-
 
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
