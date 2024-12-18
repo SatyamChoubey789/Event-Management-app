@@ -8,17 +8,16 @@ importers:
 
   .:
     dependencies:
-      emailjs-com:
-        specifier: ^3.2.0
-        version: 3.2.0
+      nodemailer:
+        specifier: ^6.9.16
+        version: 6.9.16
 
 packages:
 
-  emailjs-com@3.2.0:
-    resolution: {integrity: sha512-Prbz3E1usiAwGjMNYRv6EsJ5c373cX7/AGnZQwOfrpNJrygQJ15+E9OOq4pU8yC977Z5xMetRfc3WmDX6RcjAA==}
-    engines: {node: '>=12.0.0'}
-    deprecated: The SDK name changed to @emailjs/browser
+  nodemailer@6.9.16:
+    resolution: {integrity: sha512-psAuZdTIRN08HKVd/E8ObdV6NO7NTBY3KsC30F7M4H1OnmLCUNaS56FpYxyb26zWLSyYF9Ozch9KYHhHegsiOQ==}
+    engines: {node: '>=6.0.0'}
 
 snapshots:
 
-  emailjs-com@3.2.0: {}
+  nodemailer@6.9.16: {}
