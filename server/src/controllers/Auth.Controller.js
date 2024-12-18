@@ -42,18 +42,25 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   // Create a new user
+  const verificationToken = jwt.sign(
+    { email }, // You can also add user ID here if needed
+    process.env.VERIFICATION_TOKEN_SECRET,
+    { expiresIn: "1d" }
+  );
+
   const newUser = await User.create({
     fullname,
     email,
     password,
     role,
+    verificationToken, // Save verification token to the database
   });
 
   // Generate tokens
   const { accessToken, refreshToken } = await generateTokens(newUser._id);
 
   // Send verification email
-  const verificationUrl = `${process.env.CLIENT_URL}/verify/${accessToken}`;
+  const verificationUrl = `${process.env.CLIENT_URL}/verify/${verificationToken}`;
   await sendVerificationEmail(email, verificationUrl);
 
   // Send response with tokens
@@ -63,6 +70,38 @@ const registerUser = asyncHandler(async (req, res) => {
     refreshToken,
     user: newUser,
   });
+});
+
+const verifyUser = asyncHandler(async (req, res) => {
+  const { token } = req.params;
+
+  try {
+    // Verify the token
+    const decoded = jwt.verify(token, process.env.VERIFICATION_TOKEN_SECRET);
+    const user = await User.findOne({
+      email: decoded.email,
+      verificationToken: token,
+    });
+
+    if (!user) {
+      throw new ApiError(400, "Invalid or expired verification token");
+    }
+
+    // Mark the user as verified
+    user.isVerified = true;
+    user.verificationToken = null; // Remove the verification token
+    await user.save();
+
+    // Send verification success email
+    await sendVerificationSuccessEmail(user.email);
+
+    res.status(200).json({
+      success: true,
+      message: "User verified successfully",
+    });
+  } catch (error) {
+    throw new ApiError(400, error,"Invalid verification token");
+  }
 });
 
 const loginUser = asyncHandler(async (req, res) => {
@@ -142,6 +181,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
 module.exports = {
   registerUser,
+  verifyUser,
   loginUser,
   logoutUser,
   refreshAccessToken,

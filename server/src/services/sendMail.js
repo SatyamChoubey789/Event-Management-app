@@ -35,7 +35,6 @@ const sendVerificationSuccessEmail = async (email) => {
       process.env.EMAILJS_SERVICE_ID,
       process.env.EMAILJS_TEMPLATE_ID_SUCCESS,
       message,
-      process.env.EMAILJS_USER_ID
     );
     console.log("Verification success email sent successfully", response);
   } catch (error) {
