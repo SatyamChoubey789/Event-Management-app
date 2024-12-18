@@ -41,9 +41,9 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(409, "User with that email or username already exists");
   }
 
-  // Create a new user
+  // Create a new verification token
   const verificationToken = jwt.sign(
-    { email }, // You can also add user ID here if needed
+    { email }, // Payload can include email, or other user-specific details
     process.env.VERIFICATION_TOKEN_SECRET,
     { expiresIn: "1d" }
   );
@@ -56,7 +56,7 @@ const registerUser = asyncHandler(async (req, res) => {
     verificationToken, // Save verification token to the database
   });
 
-  // Generate tokens
+  // Generate access and refresh tokens
   const { accessToken, refreshToken } = await generateTokens(newUser._id);
 
   // Send verification email
@@ -72,22 +72,25 @@ const registerUser = asyncHandler(async (req, res) => {
   });
 });
 
+
 const verifyUser = asyncHandler(async (req, res) => {
   const { token } = req.params;
 
   try {
     // Verify the token
     const decoded = jwt.verify(token, process.env.VERIFICATION_TOKEN_SECRET);
+
+    // Find user based on email and the verification token stored in the database
     const user = await User.findOne({
       email: decoded.email,
-      verificationToken: token,
+      verificationToken: token, // Ensure the token matches the one saved in the database
     });
 
     if (!user) {
       throw new ApiError(400, "Invalid or expired verification token");
     }
 
-    // Mark the user as verified
+    // Mark the user as verified and remove the verification token
     user.isVerified = true;
     user.verificationToken = null; // Remove the verification token
     await user.save();
@@ -100,9 +103,10 @@ const verifyUser = asyncHandler(async (req, res) => {
       message: "User verified successfully",
     });
   } catch (error) {
-    throw new ApiError(400, error,"Invalid verification token");
+    throw new ApiError(400, "Invalid or expired verification token");
   }
 });
+
 
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
