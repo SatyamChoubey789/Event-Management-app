@@ -3,6 +3,10 @@ const jwt = require("jsonwebtoken");
 const process = require("node:process");
 const ApiError = require("../utils/ApiError");
 const asyncHandler = require("../utils/asyncHandler");
+const {
+  sendVerificationEmail,
+  sendVerificationSuccessEmail,
+} = require("../services/sendMail");
 
 const generateTokens = async (userId) => {
   try {
@@ -47,6 +51,10 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // Generate tokens
   const { accessToken, refreshToken } = await generateTokens(newUser._id);
+
+  // Send verification email
+  const verificationUrl = `${process.env.CLIENT_URL}/verify/${accessToken}`;
+  await sendVerificationEmail(email, verificationUrl);
 
   // Send response with tokens
   res.status(201).json({
