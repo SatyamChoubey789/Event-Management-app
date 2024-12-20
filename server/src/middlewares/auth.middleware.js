@@ -32,19 +32,3 @@ exports.verifyJWT = asyncHandler(async (req, _, next) => {
   }
 });
 
-exports.verifyToken = (req, res, next) => {
-  const token = req.headers["authorization"];
-  if (!token) {
-    return res.status(401).json({ message: "Unauthorized. Token missing!" });
-  }
-  try {
-    const decoded = jwt.verify(
-      token.split(" ")[1],
-      process.env.ACCESS_TOKEN_SECRET
-    );
-    req.user = decoded; // Attach user payload to the request
-    next();
-  } catch {
-    return res.status(403).json({ message: "Invalid or expired token!" });
-  }
-};

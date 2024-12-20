@@ -5,23 +5,35 @@ const {
   getEventById,
   getAllEvents,
   updateEvent,
-  approveEvent,
   deleteEvent,
   registerForEvent,
 } = require("../controllers/event.controller");
-const { verifyToken } = require("../middlewares/auth.middleware");
+const { verifyJWT } = require("../middlewares/auth.middleware");
+const verifyRole = require("../middlewares/role.middleware");
 
-// Public Routes
-eventRoutes.get("/getallevents", getAllEvents);
-eventRoutes.get("/getall/:id", getEventById);
+// Public Routes (Common users)
+eventRoutes.get("/getallevents", verifyJWT, getAllEvents); // View all events
+eventRoutes.get("/:id", verifyJWT, getEventById); // View a specific event
+eventRoutes.post("/register-event/:eventId", verifyJWT, registerForEvent); //
 
-// Protected Routes
-eventRoutes.post("/create-event", verifyToken, createEvent);
-eventRoutes.put("/update-event/:id", verifyToken, updateEvent);
-eventRoutes.delete("/delete-event/:id", verifyToken, deleteEvent);
-
-// Admin/Organizer Routes
-eventRoutes.put("/:id/approve", verifyToken, approveEvent);
-eventRoutes.post("/:id/register", verifyToken, registerForEvent);
+// Protected Routes (Admin/Organizer only)
+eventRoutes.post(
+  "/create-event",
+  verifyJWT,
+  verifyRole(["admin", "organizer"]),
+  createEvent
+); // Admin/Organizer can create events
+eventRoutes.put(
+  "/update-event/:id",
+  verifyJWT,
+  verifyRole(["admin", "organizer"]),
+  updateEvent
+); // Admin/Organizer can update events
+eventRoutes.delete(
+  "/delete-event/:id",
+  verifyJWT,
+  verifyRole(["admin", "organizer"]),
+  deleteEvent
+); // Admin/Organizer can delete events
 
 module.exports = eventRoutes;

@@ -1,4 +1,6 @@
 const Event = require("../models/event.model");
+const Ticket = require("../models/ticket.model");
+
 
 // Create a new event
 const createEvent = async (req, res) => {
@@ -106,19 +108,34 @@ const deleteEvent = async (req, res) => {
 // Register for event
 const registerForEvent = async (req, res) => {
   try {
+    console.log("Event ID from URL: ", req.params.eventId); // Log the event ID
     const { ticketId } = req.body;
-    const event = await Event.findById(req.params.id);
+    const event = await Event.findById(req.params.eventId);
     if (!event) return res.status(404).json({ message: "Event not found" });
 
-    event.attendees.push({ user: req.user.id, ticketId });
-    const updatedEvent = await event.save();
+    if (event.approved === true) {
+      return res
+        .status(400)
+        .json({ message: "Cannot register for approved events" });
+    }
 
-    res
-      .status(200)
-      .json({
-        message: "Registered for event successfully",
-        event: updatedEvent,
-      });
+    // Create a new ticket for the user
+    const newTicket = new Ticket({
+      ticketId,
+      user: req.user.id,
+      event: event._id,
+    });
+
+    // Save the ticket and add it to the event's attendees
+    await newTicket.save();
+    event.attendees.push({ user: req.user.id, ticketId });
+    await event.save();
+
+    res.status(200).json({
+      message: "Registered for event successfully",
+      ticket: newTicket,
+      event: event,
+    });
   } catch (err) {
     res
       .status(500)
