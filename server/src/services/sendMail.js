@@ -1,13 +1,10 @@
 const nodemailer = require("nodemailer");
-const { google } = require("googleapis"); // Google OAuth2 library
 const process = require("node:process");
 
 // Validate required environment variables
 const requiredEnvVars = [
-  "OAUTH_CLIENT_ID",
-  "OAUTH_CLIENT_SECRET",
-  "OAUTH_REFRESH_TOKEN",
   "EMAIL_USER",
+  "EMAIL_PASS", // Add password or app password here
 ];
 requiredEnvVars.forEach((key) => {
   if (!process.env[key]) {
@@ -15,36 +12,15 @@ requiredEnvVars.forEach((key) => {
   }
 });
 
-// Set up OAuth2 credentials
-const oauth2Client = new google.auth.OAuth2(
-  process.env.OAUTH_CLIENT_ID,
-  process.env.OAUTH_CLIENT_SECRET
-);
-oauth2Client.setCredentials({
-  refresh_token: process.env.OAUTH_REFRESH_TOKEN,
-});
-
-// Create Nodemailer transporter using OAuth2
+// Create Nodemailer transporter using SMTP with Gmail
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    type: "OAuth2",
-    user: process.env.EMAIL_USER,
-    clientId: process.env.OAUTH_CLIENT_ID,
-    clientSecret: process.env.OAUTH_CLIENT_SECRET,
-    refreshToken: process.env.OAUTH_REFRESH_TOKEN,
-    accessToken: async () => {
-      try {
-        const { token } = await oauth2Client.getAccessToken();
-        return token;
-      } catch (error) {
-        console.error("Error obtaining access token:", error);
-        throw new Error("Failed to get access token");
-      }
-    },
+    user: process.env.EMAIL_USER, // Gmail email address
+    pass: process.env.EMAIL_PASS, // Gmail password or app password if 2FA is enabled
   },
   tls: {
-    ciphers: "SSLv3",
+    rejectUnauthorized: false, // Optional, can be used if facing issues with SSL certificates
   },
 });
 
@@ -110,7 +86,6 @@ const sendSuccessMail = async (email) => {
     throw new Error("Error sending email verification success email");
   }
 };
-
 
 module.exports = {
   sendOTPEmail,
