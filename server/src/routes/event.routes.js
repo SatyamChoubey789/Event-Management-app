@@ -1,5 +1,5 @@
 const express = require("express");
-const router = express.Router();
+const eventRoutes = express.Router();
 const {
   createEvent,
   getEventById,
@@ -12,16 +12,16 @@ const {
 const { verifyToken } = require("../middlewares/auth.middleware");
 
 // Public Routes
-router.get("/", getAllEvents);
-router.get("/:id", getEventById);
+eventRoutes.get("/getallevents", getAllEvents);
+eventRoutes.get("/getall/:id", getEventById);
 
 // Protected Routes
-router.post("/", verifyToken, createEvent);
-router.put("/:id", verifyToken, updateEvent);
-router.delete("/:id", verifyToken, deleteEvent);
+eventRoutes.post("/create-event", verifyToken, createEvent);
+eventRoutes.put("/update-event/:id", verifyToken, updateEvent);
+eventRoutes.delete("/delete-event/:id", verifyToken, deleteEvent);
 
 // Admin/Organizer Routes
-router.put("/:id/approve", verifyToken, approveEvent);
-router.post("/:id/register", verifyToken, registerForEvent);
+eventRoutes.put("/:id/approve", verifyToken, approveEvent);
+eventRoutes.post("/:id/register", verifyToken, registerForEvent);
 
-module.exports = router;
+module.exports = eventRoutes;

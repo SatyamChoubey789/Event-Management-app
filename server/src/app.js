@@ -23,10 +23,14 @@ app.use(morgan("combined", { stream: logger.stream }));
 // routes declarations
 const authRoutes = require("./routes/auth.routes");
 const userRoutes = require("./routes/user.routes");
+const eventRoles = require("./routes/event.routes");
+const organizerRoutes = require("./routes/organizer.routes");;
 
 // routes implementation
 app.use("/api/v1/auth", authRoutes);
-app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/events",eventRoles);
+app.use("/api/v1/organizers",organizerRoutes);
 
 // http://localhost:8000/api/v1/users/register
 
