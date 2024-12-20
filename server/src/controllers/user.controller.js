@@ -4,7 +4,7 @@ const asyncHandler = require("../utils/asyncHandler");
 
 const getCurrentUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id).select(
-    "-password -refreshToken"
+    "-password -accesstoken"
   );
   res.status(200).json({
     success: true,
@@ -25,15 +25,13 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     { fullName, email },
     { new: true }
   );
+  console.log("User Updated Successfull");
 
   res.status(200).json({
     success: true,
     user,
   });
 });
-
-
-
 
 module.exports = {
   getCurrentUser,
