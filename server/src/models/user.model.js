@@ -27,9 +27,13 @@ const userSchema = new mongoose.Schema(
       enum: ["admin", "user", "organizer"],
       default: "user",
     },
-    verificationToken: {
-      type: String,
-      required: true,
+    otp: {
+      type: String, // OTP string
+      required: false,
+    },
+    otpExpiry: {
+      type: Date, // Expiry time for OTP
+      required: false,
     },
     isVerified: {
       type: Boolean,
