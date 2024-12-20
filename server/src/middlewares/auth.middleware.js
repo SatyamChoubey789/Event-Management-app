@@ -32,7 +32,7 @@ exports.verifyJWT = asyncHandler(async (req, _, next) => {
   }
 });
 
-const verifyToken = (req, res, next) => {
+exports.verifyToken = (req, res, next) => {
   const token = req.headers["authorization"];
   if (!token) {
     return res.status(401).json({ message: "Unauthorized. Token missing!" });
@@ -47,8 +47,4 @@ const verifyToken = (req, res, next) => {
   } catch {
     return res.status(403).json({ message: "Invalid or expired token!" });
   }
-};
-
-module.exports = {
-  verifyToken,
 };
