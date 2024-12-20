@@ -3,10 +3,7 @@ const jwt = require("jsonwebtoken");
 const process = require("node:process");
 const ApiError = require("../utils/ApiError");
 const asyncHandler = require("../utils/asyncHandler");
-const {
-  sendVerificationEmail,
-  sendVerificationSuccessEmail,
-} = require("../services/sendMail");
+const { sendOTPEmail, sendSuccessMail } = require("../services/sendMail");
 
 const generateTokens = async (userId) => {
   try {
@@ -139,7 +136,7 @@ const verifyOTP = asyncHandler(async (req, res) => {
   await user.save();
 
   // Send verification success email
-  await sendVerificationSuccessEmail(user.email);
+  await sendSuccessMail(user.email);
 
   res.status(200).json({
     success: true,
@@ -161,7 +158,7 @@ const loginUser = asyncHandler(async (req, res) => {
   });
 
   // Check if user if verified or not
-  if (!user ||!user.isVerified) {
+  if (!user || !user.isVerified) {
     throw new ApiError(401, "User is not verified");
   }
 
