@@ -1,15 +1,13 @@
-const User = require("../models/user.model"); // Correct path to the User model
+const ApiError = require("../utils/ApiError");
 
-const roleMiddleware = (roles) => (req, res, next) => {
-  const userRole = req.user.role; // req.user will be populated from authMiddleware
-
-  if (!roles.includes(userRole)) {
-    return res
-      .status(403)
-      .json({ msg: "Access denied: You don't have the required role" });
-  }
-
-  next();
+// Middleware to verify user role
+const verifyRole = (roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      throw new ApiError(403, "Access denied. Insufficient permissions!");
+    }
+    next();
+  };
 };
 
-module.exports = roleMiddleware;
+module.exports = verifyRole;
