@@ -27,6 +27,40 @@ const generateTokens = async (userId) => {
   }
 };
 
+const refreshAccessToken = asyncHandler(async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+
+  if (!refreshToken) {
+    throw new ApiError(401, "Unauthorized");
+  }
+
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    const user = await User.findById(decoded.id);
+
+    if (!user || user.refreshToken !== refreshToken) {
+      throw new ApiError(401, "Invalid token");
+    }
+
+    const { accessToken, newRefreshToken } = await generateTokens(user._id);
+
+    res.cookie("refreshToken", newRefreshToken, { httpOnly: true });
+    res.status(200).json({
+      success: true,
+      accessToken,
+      refreshToken: newRefreshToken,
+    });
+  } catch (error) {
+    throw new ApiError(401, error, "Invalid token");
+  }
+});
+
+const generateOTP = () => {
+  // Generate a random 6-digit OTP
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+// Register user
 const registerUser = asyncHandler(async (req, res) => {
   const { fullname, email, role, password } = req.body;
 
@@ -36,32 +70,33 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   // Check if user already exists
-  const existingUser = await User.findOne({ $or: [{ fullname }, { email }] });
+  const existingUser = await User.findOne({ email });
   if (existingUser) {
-    throw new ApiError(409, "User with that email or username already exists");
+    throw new ApiError(409, "User with that email already exists");
   }
 
-  // Create a new verification token
-  const verificationToken = jwt.sign(
-    { email }, // Payload can include email, or other user-specific details
-    process.env.VERIFICATION_TOKEN_SECRET,
-    { expiresIn: "1d" }
-  );
-
+  // Create a new user
   const newUser = await User.create({
     fullname,
     email,
     password,
     role,
-    verificationToken, // Save verification token to the database
   });
 
-  // Generate access and refresh tokens
-  const { accessToken, refreshToken } = await generateTokens(newUser._id);
+  // Generate OTP for email verification
+  const otp = generateOTP();
+  const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // OTP expires in 10 minutes
 
-  // Send verification email
-  const verificationUrl = `${process.env.CLIENT_URL}/verify/${verificationToken}`;
-  await sendVerificationEmail(email, verificationUrl);
+  // Store OTP and expiry time in the user's record
+  newUser.otp = otp;
+  newUser.otpExpiry = otpExpiry;
+  await newUser.save();
+
+  // Send OTP to the user's email
+  await sendOTPEmail(email, otp);
+
+  // Generate access and refresh tokens for the user
+  const { accessToken, refreshToken } = await generateTokens(newUser._id);
 
   // Send response with tokens
   res.status(201).json({
@@ -72,38 +107,44 @@ const registerUser = asyncHandler(async (req, res) => {
   });
 });
 
-const verifyUser = asyncHandler(async (req, res) => {
-  const { token } = req.params;
+// Verify OTP
+const verifyOTP = asyncHandler(async (req, res) => {
+  const { email, otp } = req.body;
 
-  try {
-    // Verify the token
-    const decoded = jwt.verify(token, process.env.VERIFICATION_TOKEN_SECRET);
-
-    // Find user based on email and the verification token stored in the database
-    const user = await User.findOne({
-      email: decoded.email,
-      verificationToken: token, // Ensure the token matches the one saved in the database
-    });
-
-    if (!user) {
-      throw new ApiError(400, "Invalid or expired verification token");
-    }
-
-    // Mark the user as verified and remove the verification token
-    user.isVerified = true;
-    user.verificationToken = null; // Remove the verification token
-    await user.save();
-
-    // Send verification success email
-    await sendVerificationSuccessEmail(user.email);
-
-    res.status(200).json({
-      success: true,
-      message: "User verified successfully",
-    });
-  } catch {
-    throw new ApiError(400, "Invalid or expired verification token");
+  // Validate input data
+  if (!email || !otp) {
+    throw new ApiError(400, "Email and OTP are required");
   }
+
+  // Find user by email
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  // Check if OTP is expired
+  if (new Date() > user.otpExpiry) {
+    throw new ApiError(400, "OTP has expired. Please request a new one.");
+  }
+
+  // Check if OTP matches
+  if (user.otp !== otp) {
+    throw new ApiError(400, "Invalid OTP");
+  }
+
+  // Mark the user as verified and clear OTP
+  user.isVerified = true;
+  user.otp = undefined; // Clear OTP
+  user.otpExpiry = undefined; // Clear OTP expiry
+  await user.save();
+
+  // Send verification success email
+  await sendVerificationSuccessEmail(user.email);
+
+  res.status(200).json({
+    success: true,
+    message: "Email verified successfully",
+  });
 });
 
 const loginUser = asyncHandler(async (req, res) => {
@@ -118,6 +159,11 @@ const loginUser = asyncHandler(async (req, res) => {
   const user = await User.findOne({
     $or: [{ email: email }, { username: email }],
   });
+
+  // Check if user if verified or not
+  if (!user ||!user.isVerified) {
+    throw new ApiError(401, "User is not verified");
+  }
 
   // Check if user exists and password matches
   if (!user || !(await user.isPasswordCorrect(password))) {
@@ -153,37 +199,9 @@ const logoutUser = asyncHandler(async (req, res) => {
   });
 });
 
-const refreshAccessToken = asyncHandler(async (req, res) => {
-  const refreshToken = req.cookies.refreshToken;
-
-  if (!refreshToken) {
-    throw new ApiError(401, "Unauthorized");
-  }
-
-  try {
-    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-    const user = await User.findById(decoded.id);
-
-    if (!user || user.refreshToken !== refreshToken) {
-      throw new ApiError(401, "Invalid token");
-    }
-
-    const { accessToken, newRefreshToken } = await generateTokens(user._id);
-
-    res.cookie("refreshToken", newRefreshToken, { httpOnly: true });
-    res.status(200).json({
-      success: true,
-      accessToken,
-      refreshToken: newRefreshToken,
-    });
-  } catch (error) {
-    throw new ApiError(401, error, "Invalid token");
-  }
-});
-
 module.exports = {
   registerUser,
-  verifyUser,
+  verifyOTP,
   loginUser,
   logoutUser,
   refreshAccessToken,
