@@ -59,10 +59,10 @@ const generateOTP = () => {
 
 // Register user
 const registerUser = asyncHandler(async (req, res) => {
-  const { fullname, email, role, password } = req.body;
+  const { fullName, email, role, password } = req.body;
 
   // Validate input data
-  if (!fullname || !email || !role || !password) {
+  if (!fullName || !email || !role || !password) {
     throw new ApiError(400, "All fields are required");
   }
 
@@ -74,7 +74,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // Create a new user
   const newUser = await User.create({
-    fullname,
+    fullName,
     email,
     password,
     role,
