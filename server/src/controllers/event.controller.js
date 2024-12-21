@@ -8,7 +8,6 @@ const {
   generateTicketId,
 } = require("../utils/GenerateIDs");
 
-
 // Create a new event
 const createEvent = asyncHandler(async (req, res) => {
   const { name, description, date, location } = req.body;
@@ -68,39 +67,38 @@ const updateEvent = asyncHandler(async (req, res) => {
   });
 });
 
-// Approve an event
-const approveEvent = asyncHandler(async (req, res) => {
-  const { eventId } = req.params; // Use eventId from request params
+// Admin approval/rejection of an event
+const handleEventApproval = asyncHandler(async (req, res) => {
+  const { eventId } = req.params;
+  const { status } = req.body; // 'approved' or 'rejected'
 
-  const event = await Event.findOne({ eventId });
-  if (!event) return res.status(404).json({ message: "Event not found" });
-
-  event.approved = true;
-  const savedEvent = await event.save();
-
-  // Generate QR codes for all registered tickets
-  for (const attendee of event.attendees) {
-    const qrCode = await generateQRCode(event.eventId, attendee.ticketId); // Pass eventId
-    await Ticket.findOneAndUpdate({ ticketId: attendee.ticketId }, { qrCode });
+  if (!["approved", "rejected"].includes(status)) {
+    throw new ApiError(400, "Invalid approval status");
   }
 
+  const event = await Event.findOne({ eventId });
+  if (!event) throw new ApiError(404, "Event not found");
+
+  event.approvalStatus = status;
+
+  // Generate QR codes if approved
+  if (status === "approved") {
+    for (const attendee of event.attendees) {
+      const qrCode = await generateQRCode(event.eventId, attendee.ticketId);
+      await Ticket.findOneAndUpdate(
+        { ticketId: attendee.ticketId },
+        { qrCode }
+      );
+    }
+  }
+
+  await event.save();
+
   res.status(200).json({
-    message: "Event approved successfully",
-    event: savedEvent,
+    success: true,
+    message: `Event ${status} successfully`,
+    event,
   });
-});
-
-// Search events
-const searchEvents = asyncHandler(async (req, res) => {
-  const { name, location, date } = req.query;
-  const query = {};
-
-  if (name) query.name = { $regex: name, $options: "i" };
-  if (location) query.location = { $regex: location, $options: "i" };
-  if (date) query.date = { $gte: new Date(date) };
-
-  const events = await Event.find(query).populate("organizer", "name email");
-  res.status(200).json({ events });
 });
 
 // Register for an event
@@ -176,32 +174,11 @@ const deregisterEvent = asyncHandler(async (req, res) => {
   });
 });
 
-// Delete an event
-const deleteEvent = asyncHandler(async (req, res) => {
-  const { eventId } = req.params; // Use eventId from request params
-
-  const event = await Event.findOneAndDelete({
-    eventId,
-    organizer: req.user._id,
-  });
-
-  if (!event) {
-    throw new ApiError(404, "Event not found or not authorized");
-  }
-
-  res.status(200).json({
-    success: true,
-    message: "Event deleted successfully",
-  });
-});
-
 module.exports = {
   createEvent,
   getMyEvents,
   updateEvent,
-  deleteEvent,
-  approveEvent,
+  approveEvent: handleEventApproval, // Unified approval handling
   registerForEvent,
   deregisterEvent,
-  searchEvents,
 };

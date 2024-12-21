@@ -5,7 +5,12 @@ const eventSchema = new mongoose.Schema(
     eventId: {
       type: String,
       required: true,
-      trim: true, // ensure unique Id for event
+      unique: true, // Ensure event IDs are unique
+      trim: true,
+    },
+    name: {
+      type: String,
+      required: true,
     },
     description: {
       type: String,
@@ -28,16 +33,18 @@ const eventSchema = new mongoose.Schema(
       {
         user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
         ticketId: { type: String, required: true },
+        approvalStatus: {
+          type: String,
+          enum: ["pending", "approved", "rejected"],
+          default: "pending",
+        },
       },
     ],
-    approved: { type: Boolean, default: false },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
-    updatedAt: {
-      type: Date,
-      default: Date.now,
+
+    approvalStatus: {
+      type: String,
+      enum: ["pending", "requested", "approved", "rejected"],
+      default: "pending",
     },
   },
   { timestamps: true }
