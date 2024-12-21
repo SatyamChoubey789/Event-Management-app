@@ -5,7 +5,7 @@ const eventSchema = new mongoose.Schema(
     eventId: {
       type: String,
       required: true,
-      trim: true,
+      trim: true, // ensure unique Id for event
     },
     description: {
       type: String,

@@ -2,9 +2,12 @@ const Event = require("../models/event.model");
 const Ticket = require("../models/ticket.model");
 const ApiError = require("../utils/ApiError");
 const asyncHandler = require("../utils/asyncHandler");
-const { generateTicketId } = require("../utils/generateTicketId");
-const { generateQRCode } = require("../utils/generateQRCode");
-const { generateEventId } = require("../utils/generateEventId"); // Placeholder for eventId generation
+const {
+  generateQRCode,
+  generateEventId,
+  generateTicketId,
+} = require("../utils/GenerateIDs");
+
 
 // Create a new event
 const createEvent = asyncHandler(async (req, res) => {
@@ -142,7 +145,6 @@ const registerForEvent = asyncHandler(async (req, res) => {
     event,
   });
 });
-
 
 // Deregister from an event
 const deregisterEvent = asyncHandler(async (req, res) => {

@@ -10,12 +10,13 @@ const createEvent = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All fields are required");
   }
 
+  // Create the event and associate it with the authenticated organizer
   const event = await Event.create({
     name,
     description,
     date,
     location,
-    organizer: req.user._id,
+    organizer: req.user._id, // Link the event to the organizer (authenticated user)
   });
 
   res.status(201).json({
@@ -27,7 +28,9 @@ const createEvent = asyncHandler(async (req, res) => {
 
 // Get all events created by the organizer
 const getMyEvents = asyncHandler(async (req, res) => {
+  // Fetch events where the organizer is the logged-in user
   const events = await Event.find({ organizer: req.user._id });
+
   res.status(200).json({
     success: true,
     events,
@@ -36,13 +39,14 @@ const getMyEvents = asyncHandler(async (req, res) => {
 
 // Update an event
 const updateEvent = asyncHandler(async (req, res) => {
-  const { id } = req.params;
+  const { eventId } = req.params; // Use eventId from the request params
   const { name, description, date, location } = req.body;
 
+  // Find and update the event. It must be created by the authenticated user.
   const event = await Event.findOneAndUpdate(
-    { _id: id, organizer: req.user._id },
-    { name, description, date, location },
-    { new: true }
+    { _id: eventId, organizer: req.user._id }, // Ensure the event belongs to the user
+    { name, description, date, location }, // Fields to update
+    { new: true } // Return the updated event
   );
 
   if (!event) {
@@ -58,11 +62,12 @@ const updateEvent = asyncHandler(async (req, res) => {
 
 // Delete an event
 const deleteEvent = asyncHandler(async (req, res) => {
-  const { id } = req.params;
+  const { eventId } = req.params; // Use eventId from the request params
 
+  // Find the event by ID and ensure it belongs to the authenticated user
   const event = await Event.findOneAndDelete({
-    _id: id,
-    organizer: req.user._id,
+    _id: eventId,
+    organizer: req.user._id, // Ensure the user has permission to delete the event
   });
 
   if (!event) {
