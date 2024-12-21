@@ -5,7 +5,6 @@ const {
   getEventById,
   getAllEvents,
   updateEvent,
-  deleteEvent,
   approveEvent,
   registerForEvent,
   deregisterEvent,

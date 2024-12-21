@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const approvalController = require("./approval.routes");
+const approvalController = require("../controllers/approval.controller");
 const verifyRole = require("../middlewares/role.middleware");
 
 // Request approval for an event

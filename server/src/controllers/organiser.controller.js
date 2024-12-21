@@ -1,5 +1,6 @@
 const Event = require("../models/event.model");
 const User = require("../models/user.model");
+const Ticket = require("../models/ticket.model");
 const ApiError = require("../utils/ApiError");
 const asyncHandler = require("../utils/asyncHandler");
 const {
@@ -84,6 +85,7 @@ const deleteEvent = asyncHandler(async (req, res) => {
   });
 });
 
+// get pending approval of events
 const getPendingApprovalEvents = asyncHandler(async (req, res) => {
   const events = await Event.find({
     organizer: req.user._id,
@@ -96,6 +98,7 @@ const getPendingApprovalEvents = asyncHandler(async (req, res) => {
   });
 });
 
+// update organizer profile
 const updateOrganizerProfile = asyncHandler(async (req, res) => {
   const { name, email } = req.body;
 
@@ -114,7 +117,7 @@ const updateOrganizerProfile = asyncHandler(async (req, res) => {
   });
 });
 
-
+// get profile  information of the organizer
 const getOrganizerProfile = asyncHandler(async (req, res) => {
   const organizer = req.user; // Assuming `req.user` contains authenticated user data
 
