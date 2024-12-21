@@ -19,8 +19,12 @@ const ticketSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["booked", "cancelled", "pending"], // You can add more ticket statuses if needed
+      enum: ["booked", "cancelled", "pending","refunded"], // You can add more ticket statuses if needed
       default: "booked",
+    },
+    qrCode: {
+      type: String, // Store QR code as a URL (data URL or an image URL)
+      required: false, // Only populate this after approval
     },
     createdAt: {
       type: Date,

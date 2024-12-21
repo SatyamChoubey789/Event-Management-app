@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const eventSchema = new mongoose.Schema(
   {
-    name: {
+    eventId: {
       type: String,
       required: true,
       trim: true,
@@ -30,14 +30,7 @@ const eventSchema = new mongoose.Schema(
         ticketId: { type: String, required: true },
       },
     ],
-    approved: {
-      type: Boolean,
-      default: false,
-    },
-    qrCode: {
-      type: String, // Store QR code image URL or data string
-      required: false,
-    },
+    approved: { type: Boolean, default: false },
     createdAt: {
       type: Date,
       default: Date.now,
