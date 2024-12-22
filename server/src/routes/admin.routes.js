@@ -5,8 +5,8 @@ const {getUser, getUsersByEmail}= require("../controllers/admin.controller");
 
 // Get a all users
 
-adminRoutes.route("/users").get(getUser);
-adminRoutes.route("/users").get(getUsersByEmail);
+adminRoutes.route("/all-users").get(getUser);
+adminRoutes.route("/getuserbyemail").get(getUsersByEmail);
 
 
 

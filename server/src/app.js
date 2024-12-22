@@ -26,7 +26,7 @@ const userRoutes = require("./routes/user.routes");
 const eventRoles = require("./routes/event.routes");
 const organizerRoutes = require("./routes/organizer.routes");;
 const approvalRoutes = require("./routes/approval.routes");
-
+const adminRoutes = require("./routes/admin.routes");
 
 // routes implementation
 app.use("/api/v1/auth", authRoutes);
@@ -34,6 +34,7 @@ app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/events",eventRoles);
 app.use("/api/v1/organizers",organizerRoutes);
 app.use("/api/v1/approval",approvalRoutes);
+app.use("/api/v1/admin",adminRoutes);
 
 // http://localhost:8000/api/v1/users/register
 
