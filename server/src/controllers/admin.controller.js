@@ -1,147 +1,120 @@
-// Write Admin controller functions here for our ems application
 const User = require("../models/user.model");
-const AsyncHandler = require("../utils/asyncHandler");
 const ApiError = require("../utils/ApiError");
-
+const AsyncHandler = require("../utils/asyncHandler");
 
 // Get all users
-
-exports.getUsers = async (req, res) => {
-  try {
-    const users = await User.find({});
-    res.status(200).json(users);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+exports.getUsers = AsyncHandler(async (req, res) => {
+  const users = await User.find({});
+  res.status(200).json(users);
+});
 
 // Get a user by id
-
-exports.getUser = async (req, res) => {
-  try {
-    const user = await User.findById(req.params._id);
-    if (!user) return res.status(404).json({ message: "User not found" });
-    res.status(200).json(user);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+exports.getUser = AsyncHandler(async (req, res) => {
+  const user = await User.findById(req.params._id);
+  if (!user) {
+    throw new ApiError(404, "User not found");
   }
-};
+  res.status(200).json(user);
+});
 
 // Update a user by id
-
-exports.updateUser = async (req, res) => {
+exports.updateUser = AsyncHandler(async (req, res) => {
   const { name, email, role } = req.body;
-  const user = new User({
-    _id: req.params.id,
-    name,
-    email,
-    role,
-  });
-
-  try {
-    const updatedUser = await user.save();
-    res.status(200).json(updatedUser);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+  const updatedUser = await User.findByIdAndUpdate(
+    req.params.id,
+    { name, email, role },
+    { new: true, runValidators: true }
+  );
+  if (!updatedUser) {
+    throw new ApiError(404, "User not found");
   }
-};
+  res.status(200).json(updatedUser);
+});
 
 // Delete a user by id
-
-exports.deleteUser = async (req, res) => {
-  try {
-    const user = await User.findByIdAndDelete(req.params.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
-    res.status(200).json({ message: "User deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+exports.deleteUser = AsyncHandler(async (req, res) => {
+  const user = await User.findByIdAndDelete(req.params.id);
+  if (!user) {
+    throw new ApiError(404, "User not found");
   }
-};
+  res.status(200).json({ message: "User deleted successfully" });
+});
 
 // Get all users by role
-
-exports.getUsersByRole = async (req, res) => {
-  try {
-    const users = await User.find({ role: req.params.role });
-    if (!users) return res.status(404).json({ message: "No users found" });
-    res.status(200).json(users);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+exports.getUsersByRole = AsyncHandler(async (req, res) => {
+  const users = await User.find({ role: req.params.role });
+  if (users.length === 0) {
+    throw new ApiError(404, "No users found with the specified role");
   }
-};
-
+  res.status(200).json(users);
+});
 
 // Get all users by email
-
-exports.getUsersByEmail = async (req, res) => {
-  try {
-    const users = await User.find({ email: req.params.email });
-    if (!users) return res.status(404).json({ message: "No users found" });
-    res.status(200).json(users);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+exports.getUsersByEmail = AsyncHandler(async (req, res) => {
+  const users = await User.find({ email: req.params.email });
+  if (users.length === 0) {
+    throw new ApiError(404, "No users found with the specified email");
   }
-};
-
+  res.status(200).json(users);
+});
 
 // Get all users by name
-
-exports.getUsersByName = async (req, res) => {
-  try {
-    const users = await User.find({ name: req.params.name });
-    if (!users) return res.status(404).json({ message: "No users found" });
-    res.status(200).json(users);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+exports.getUsersByName = AsyncHandler(async (req, res) => {
+  const users = await User.find({ name: req.params.name });
+  if (users.length === 0) {
+    throw new ApiError(404, "No users found with the specified name");
   }
-};
+  res.status(200).json(users);
+});
 
 // Get all users by role and email
-
-exports.getUsersByRoleAndEmail = async (req, res) => {
-  try {
-    const users = await User.find({ role: req.params.role, email: req.params.email });
-    if (!users) return res.status(404).json({ message: "No users found" });
-    res.status(200).json(users);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+exports.getUsersByRoleAndEmail = AsyncHandler(async (req, res) => {
+  const users = await User.find({
+    role: req.params.role,
+    email: req.params.email,
+  });
+  if (users.length === 0) {
+    throw new ApiError(404, "No users found with the specified role and email");
   }
-};
+  res.status(200).json(users);
+});
 
 // Get all users by role and name
-
-exports.getUsersByRoleAndName = async (req, res) => {
-  try {
-    const users = await User.find({ role: req.params.role, name: req.params.name });
-    if (!users) return res.status(404).json({ message: "No users found" });
-    res.status(200).json(users);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+exports.getUsersByRoleAndName = AsyncHandler(async (req, res) => {
+  const users = await User.find({
+    role: req.params.role,
+    name: req.params.name,
+  });
+  if (users.length === 0) {
+    throw new ApiError(404, "No users found with the specified role and name");
   }
-};
+  res.status(200).json(users);
+});
 
 // Get all users by email and name
-
-exports.getUsersByEmailAndName = async (req, res) => {
-  try {
-    const users = await User.find({ email: req.params.email, name: req.params.name });
-    if (!users) return res.status(404).json({ message: "No users found" });
-    res.status(200).json(users);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+exports.getUsersByEmailAndName = AsyncHandler(async (req, res) => {
+  const users = await User.find({
+    email: req.params.email,
+    name: req.params.name,
+  });
+  if (users.length === 0) {
+    throw new ApiError(404, "No users found with the specified email and name");
   }
-};
+  res.status(200).json(users);
+});
 
 // Get all users by role, email, and name
-
-exports.getUsersByRoleEmailAndName = async (req, res) => {
-  try {
-    const users = await User.find({ role: req.params.role, email: req.params.email, name: req.params.name });
-    if (!users) return res.status(404).json({ message: "No users found" });
-    res.status(200).json(users);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+exports.getUsersByRoleEmailAndName = AsyncHandler(async (req, res) => {
+  const users = await User.find({
+    role: req.params.role,
+    email: req.params.email,
+    name: req.params.name,
+  });
+  if (users.length === 0) {
+    throw new ApiError(
+      404,
+      "No users found with the specified role, email, and name"
+    );
   }
-};
-
-
+  res.status(200).json(users);
+});
