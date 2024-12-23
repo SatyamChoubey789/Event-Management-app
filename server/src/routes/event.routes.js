@@ -35,12 +35,6 @@ eventRoutes.put(
   verifyRole(["admin", "organizer"]),
   updateEvent
 ); // Admin/Organizer can update events
-eventRoutes.delete(
-  "/delete-event/:id",
-  verifyJWT,
-  verifyRole(["admin", "organizer"]),
-  deleteEvent
-); // Admin/Organizer can delete events
 eventRoutes.post(
   "/approve-event/:id",
   verifyJWT,
