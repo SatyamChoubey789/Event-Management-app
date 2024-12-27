@@ -10,7 +10,7 @@ const verifyRole = (roles) => {
         new ApiError(403, "Access denied. Insufficient permissions!")
       );
     }
-    next(); Proceed to the next middleware if the user has the correct role
+    next(); // Proceed to the next middleware if the user has the correct role
   };
 };
 
