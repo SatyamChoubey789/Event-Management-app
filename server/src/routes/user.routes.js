@@ -24,4 +24,4 @@ userRoutes
   .route("/admin/role")
   .post(verifyJWT, verifyRole(["admin"]), updateUserRole);
 
-module.exports = userRoutes
+module.exports = userRoutes;
