@@ -3,7 +3,7 @@ const {
   registerUser,
   loginUser,
   logoutUser,
-  verifyOTP
+  verifyOTP,
 } = require("../controllers/auth.controller");
 const { verifyJWT } = require("../middlewares/auth.middleware");
 const authRoutes = new Router();
