@@ -1,4 +1,4 @@
-const Approval = require("../models/approval.model")
+const Approval = require("../models/approval.model");
 const Event = require("../models/event.model");
 const ApiError = require("../utils/ApiError");
 const asyncHandler = require("../utils/asyncHandler");
