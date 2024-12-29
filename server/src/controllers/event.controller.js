@@ -1,4 +1,4 @@
-const Event = require("../models/event.model")
+const Event = require("../models/event.model");
 const Ticket = require("../models/ticket.model");
 const ApiError = require("../utils/ApiError");
 const asyncHandler = require("../utils/asyncHandler");
