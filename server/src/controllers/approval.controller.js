@@ -72,4 +72,4 @@ module.exports = {
   requestApproval,
   reviewApproval,
   getApprovals,
-};
+}
