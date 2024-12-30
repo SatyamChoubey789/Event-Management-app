@@ -181,4 +181,4 @@ module.exports = {
   approveEvent: handleEventApproval, // Unified approval handling
   registerForEvent,
   deregisterEvent,
-}
+};
