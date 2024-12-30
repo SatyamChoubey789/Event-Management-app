@@ -117,4 +117,4 @@ exports.getUsersByRoleEmailAndName = AsyncHandler(async (req, res) => {
     );
   }
   res.status(200).json(users);
-});
+})
