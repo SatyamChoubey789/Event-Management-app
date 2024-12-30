@@ -202,4 +202,4 @@ module.exports = {
   loginUser,
   logoutUser,
   refreshAccessToken,
-};
+}
