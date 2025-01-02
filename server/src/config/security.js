@@ -12,4 +12,4 @@ module.exports = (app) => {
       max: 100, // Limit each IP to 100 requests
     })
   );
-};
+}
